@@ -14,76 +14,80 @@
 package cmd
 
 import (
-	"bytes"
 	"github.com/inovacc/gofs-cli/internal/project"
 	"github.com/inovacc/utils/v2/tree"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	//initCmd.SetOut(new(bytes.Buffer))
-	initCmd.SetErr(new(bytes.Buffer))
-}
-
 var (
-	initCmd = &cobra.Command{
-		Use:     "init [path]",
-		Aliases: []string{"initialize", "initialise", "create"},
-		Short:   "Initialize a Cobra Application",
-		Long: `Initialize (cobra-cli init) will create a new application, with a license
+	userLicense string
+	userAuthor  string
+)
+
+var initCmd = &cobra.Command{
+	Use:     "init [path]",
+	Aliases: []string{"initialize", "initialise", "create"},
+	Short:   "Initialize a Cobra Application",
+	Long: `Initialize (cobra-cli init) will create a new application, with a license
 and the appropriate structure for a Cobra-based CLI application.
 
 Cobra init must be run inside of a go module (please run "go mod init <MODNAME>" first)
 `,
-		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			var comps []string
-			var directive cobra.ShellCompDirective
-			if len(args) == 0 {
-				comps = cobra.AppendActiveHelp(comps, "Optionally specify the path of the go module to initialize")
-				directive = cobra.ShellCompDirectiveDefault
-			} else if len(args) == 1 {
-				comps = cobra.AppendActiveHelp(comps, "This command does not take any more arguments (but may accept flags)")
-				directive = cobra.ShellCompDirectiveNoFileComp
-			} else {
-				comps = cobra.AppendActiveHelp(comps, "ERROR: Too many arguments specified")
-				directive = cobra.ShellCompDirectiveNoFileComp
-			}
-			return comps, directive
-		},
-		Run: func(cmd *cobra.Command, args []string) {
-			afs := afero.NewOsFs()
-			newProject := project.NewProject(afs, args)
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		var comps []string
+		var directive cobra.ShellCompDirective
+		if len(args) == 0 {
+			comps = cobra.AppendActiveHelp(comps, "Optionally specify the path of the go module to initialize")
+			directive = cobra.ShellCompDirectiveDefault
+		} else if len(args) == 1 {
+			comps = cobra.AppendActiveHelp(comps, "This command does not take any more arguments (but may accept flags)")
+			directive = cobra.ShellCompDirectiveNoFileComp
+		} else {
+			comps = cobra.AppendActiveHelp(comps, "ERROR: Too many arguments specified")
+			directive = cobra.ShellCompDirectiveNoFileComp
+		}
+		return comps, directive
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		afs := afero.NewOsFs()
+		newProject := project.NewProject(afs, args)
 
-			projectGenerator, err := project.NewProjectGenerator(afs, newProject)
-			cobra.CheckErr(err)
+		projectGenerator, err := project.NewProjectGenerator(afs, newProject, userLicense, userAuthor)
+		cobra.CheckErr(err)
 
-			cmd.Printf("Creating project structure\n")
-			cobra.CheckErr(projectGenerator.CreateProject())
+		cobra.CheckErr(projectGenerator.CreateProject())
 
-			commands := []string{
-				"gopkg.in/yaml.v3",
-				"github.com/spf13/afero",
-				"github.com/spf13/cobra",
-				"github.com/spf13/viper",
-				"github.com/google/uuid",
-				"github.com/inovacc/logger",
-				"github.com/inovacc/utils/v2/uid",
-				"go.uber.org/automaxprocs",
-			}
+		commands := []string{
+			"gopkg.in/yaml.v3",
+			"github.com/spf13/afero",
+			"github.com/spf13/cobra",
+			"github.com/spf13/viper",
+			"github.com/google/uuid",
+			"github.com/inovacc/logger",
+			"github.com/inovacc/utils/v2/uid",
+			"go.uber.org/automaxprocs",
+		}
 
-			cmd.Printf("Installing dependences\n")
-			for _, command := range commands {
-				cobra.CheckErr(project.GoGet(cmd.Context(), command))
-			}
+		cmd.Printf("* Installing dependences\n")
 
-			cmd.Printf("Your application is ready at:\n\n%s\n", projectGenerator.GetProjectPath())
+		for _, command := range commands {
+			cobra.CheckErr(project.GoGet(cmd.Context(), command))
+		}
 
-			newTree := tree.NewTree(afs, projectGenerator.GetProjectPath(), ".git")
+		cmd.Printf("* Your application is ready at:\n\n%s\n", projectGenerator.GetProjectPath())
 
-			cobra.CheckErr(newTree.MakeTree())
+		newTree := tree.NewTree(afs, projectGenerator.GetProjectPath(), ".git")
 
-			cmd.Println(newTree.ToString())
-		},
-	}
-)
+		cobra.CheckErr(newTree.MakeTree())
+
+		cmd.Println(newTree.ToString())
+	},
+}
+
+func init() {
+	initCmd.Flags().StringVarP(&userAuthor, "author", "a", "NAME HERE <EMAIL ADDRESS>", "author name for copyright attribution")
+	initCmd.Flags().StringVarP(&userLicense, "license", "l", "none", "name of license for the project")
+
+	rootCmd.AddCommand(initCmd)
+}
