@@ -22,7 +22,7 @@ import (
 )
 
 func init() {
-	initCmd.SetOut(new(bytes.Buffer))
+	//initCmd.SetOut(new(bytes.Buffer))
 	initCmd.SetErr(new(bytes.Buffer))
 }
 
@@ -53,11 +53,12 @@ Cobra init must be run inside of a go module (please run "go mod init <MODNAME>"
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			afs := afero.NewOsFs()
-			newProject := project.NewProject(args)
+			newProject := project.NewProject(afs, args)
 
 			projectGenerator, err := project.NewProjectGenerator(afs, newProject)
 			cobra.CheckErr(err)
 
+			cmd.Printf("Creating project structure\n")
 			cobra.CheckErr(projectGenerator.CreateProject())
 
 			commands := []string{
@@ -67,20 +68,18 @@ Cobra init must be run inside of a go module (please run "go mod init <MODNAME>"
 				"github.com/spf13/viper",
 				"github.com/google/uuid",
 				"github.com/inovacc/logger",
+				"github.com/inovacc/utils/v2/uid",
 				"go.uber.org/automaxprocs",
 			}
 
+			cmd.Printf("Installing dependences\n")
 			for _, command := range commands {
-				_, err = project.GoCommand(command)
-				cobra.CheckErr(err)
+				cobra.CheckErr(project.GoGet(cmd.Context(), command))
 			}
 
-			_, err = project.GoCommand("mod", "tidy", "-v")
-			cobra.CheckErr(err)
+			cmd.Printf("Your application is ready at:\n\n%s\n", projectGenerator.GetProjectPath())
 
-			cmd.Printf("Your Cobra application is ready at\n%s\n", projectGenerator.GetProjectPath())
-
-			newTree := tree.NewTree(afs, projectGenerator.GetProjectPath())
+			newTree := tree.NewTree(afs, projectGenerator.GetProjectPath(), ".git")
 
 			cobra.CheckErr(newTree.MakeTree())
 

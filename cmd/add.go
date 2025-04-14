@@ -60,7 +60,7 @@ Example: cobra-cli add server -> resulting in a new cmd/server.go`,
 			}
 
 			afs := afero.NewOsFs()
-			newProject := project.NewProject(args)
+			newProject := project.NewProject(afs, args)
 
 			projectGenerator, err := project.NewProjectGenerator(afs, newProject)
 			cobra.CheckErr(err)
