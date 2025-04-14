@@ -16,7 +16,6 @@ package cmd
 import (
 	"context"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"os"
 )
 
@@ -41,16 +40,4 @@ func Execute() {
 
 func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-
-	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringP("license", "l", "none", "name of license for the project")
-
-	cobra.CheckErr(viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author")))
-	cobra.CheckErr(viper.BindPFlag("license", rootCmd.PersistentFlags().Lookup("license")))
-
-	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	viper.SetDefault("license", "none")
-
-	rootCmd.AddCommand(addCmd)
-	rootCmd.AddCommand(initCmd)
 }

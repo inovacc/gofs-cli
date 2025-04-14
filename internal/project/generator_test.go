@@ -28,8 +28,6 @@ func TestMain(t *testing.M) {
 }
 
 func TestGenerateRoot(t *testing.T) {
-	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	viper.SetDefault("license", "apache2")
 	viper.SetDefault("projectName", "testApp")
 	defer viper.Reset()
 
@@ -37,7 +35,7 @@ func TestGenerateRoot(t *testing.T) {
 
 	project.SetPkgName("github.com/acme/myproject")
 
-	generator, err := NewProjectGenerator(afs, project)
+	generator, err := NewProjectGenerator(afs, project, "apache2", "NAME HERE <EMAIL ADDRESS>")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +96,7 @@ func TestGenerateSub(t *testing.T) {
 
 	project.SetPkgName("github.com/acme/myproject")
 
-	generator, err := NewProjectGenerator(afs, project)
+	generator, err := NewProjectGenerator(afs, project, "apache2", "NAME HERE <EMAIL ADDRESS>")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,6 +123,10 @@ func TestGenerateSub(t *testing.T) {
 	}
 
 	fmt.Println(newTree.ToString())
+}
+
+func TestModule(t *testing.T) {
+	t.Log(getModImportPathV(afs))
 }
 
 func assertFileMatchesGolden(t *testing.T, fs afero.Fs, filePath string, goldenPath string) {
