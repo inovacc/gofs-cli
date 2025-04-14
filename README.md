@@ -1,4 +1,4 @@
-# Cobra Generator
+# Cobra Generator [![Test](https://github.com/inovacc/gofs-cli/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/inovacc/gofs-cli/actions/workflows/test.yml)
 
 Cobra provides its own program that will create your application and add any
 commands you want. It's the easiest way to incorporate Cobra into your application.
