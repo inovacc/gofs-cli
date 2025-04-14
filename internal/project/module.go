@@ -1,11 +1,9 @@
 package project
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/spf13/afero"
 	"log"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -97,23 +95,4 @@ func parseModInfoV(afs afero.Fs) (*Mod, *CurDir, error) {
 		return nil, nil, fmt.Errorf("cannot parse mod info -e, %v", err)
 	}
 	return &mod, &dir, nil
-}
-
-func GoGet(mod string) error {
-	_, err := GoCommand("go", "get", mod)
-	return err
-}
-
-func modInfoJSON(v any, args ...string) error {
-	cmdArgs := append([]string{"list", "-json"}, args...)
-	out, err := GoCommand(cmdArgs...)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(out, v)
-}
-
-func GoCommand(cmdArgs ...string) ([]byte, error) {
-	log.Println("Running command: go", cmdArgs)
-	return exec.Command("go", cmdArgs...).Output()
 }

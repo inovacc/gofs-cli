@@ -33,7 +33,7 @@ func TestGenerateRoot(t *testing.T) {
 	viper.SetDefault("projectName", "testApp")
 	defer viper.Reset()
 
-	project := NewProject([]string{"myproject"})
+	project := NewProject(afs, []string{"myproject"})
 
 	project.SetPkgName("github.com/acme/myproject")
 
@@ -94,7 +94,7 @@ func TestGenerateSub(t *testing.T) {
 	viper.SetDefault("projectName", "testApp")
 	defer viper.Reset()
 
-	project := NewProject([]string{"service"})
+	project := NewProject(afs, []string{"service"})
 
 	project.SetPkgName("github.com/acme/myproject")
 

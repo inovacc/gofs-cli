@@ -34,8 +34,7 @@ func detectProjectStructure() error {
 	}
 
 	check := func(name, file string) error {
-		fp := filepath.Join(wd, file)
-		info, err := os.Stat(fp)
+		info, err := os.Stat(filepath.Join(wd, file))
 		if err != nil {
 			if os.IsNotExist(err) {
 				return nil
@@ -54,12 +53,12 @@ func detectProjectStructure() error {
 	return check("mod", "go.mod")
 }
 
-func getModImportPath(wd string) string {
-	mod, cd := parseModInfo(wd)
+func getModImportPath(afs afero.Fs, wd string) string {
+	mod, cd := parseModInfo(afs, wd)
 	return path.Join(mod.Path, fileToURL(strings.TrimPrefix(cd.Dir, mod.Dir)))
 }
 
-func parseModInfo(wd string) (*Mod, *CurDir) {
+func parseModInfo(afs afero.Fs, wd string) (*Mod, *CurDir) {
 	var mod Mod
 	var dir CurDir
 
@@ -67,8 +66,13 @@ func parseModInfo(wd string) (*Mod, *CurDir) {
 
 	if mod.Path == "command-line-arguments" {
 		if _, err := os.Stat("go.mod"); err != nil {
-			_, err := GoCommand("mod", "init", path.Base(wd))
+			file, err := afs.Create("go.mod")
 			cobra.CheckErr(err)
+
+			_, err = file.WriteString(fmt.Sprintf("module %s\n\ngo %v", filepath.Base(wd), mod.GoVersion))
+			cobra.CheckErr(err)
+
+			cobra.CheckErr(modInfoJSON(&mod, "-m"))
 		}
 	}
 
@@ -157,12 +161,6 @@ func (g *Generator) prepareModels() error {
 			return err
 		}
 	}
-
-	//if !newProject["mod"] {
-	//	if err := g.gitInit(); err != nil {
-	//		return err
-	//	}
-	//}
 
 	return nil
 }

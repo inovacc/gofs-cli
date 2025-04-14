@@ -1,6 +1,7 @@
 package project
 
 import (
+	"github.com/spf13/afero"
 	"os"
 	"path"
 	"path/filepath"
@@ -15,7 +16,7 @@ type Project struct {
 	Legal        *License
 }
 
-func NewProject(args []string) *Project {
+func NewProject(afs afero.Fs, args []string) *Project {
 	wd, _ := os.Getwd()
 
 	if len(args) > 0 {
@@ -28,7 +29,7 @@ func NewProject(args []string) *Project {
 		Args:         args,
 		AbsolutePath: wd,
 		AppName:      path.Base(wd),
-		PkgName:      getModImportPath(wd),
+		PkgName:      getModImportPath(afs, wd),
 		Legal:        &License{},
 	}
 }
