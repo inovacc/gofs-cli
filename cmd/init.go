@@ -15,11 +15,10 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/inovacc/cobra-cli/internal/project"
+	"github.com/inovacc/gofs-cli/internal/project"
 	"github.com/inovacc/utils/v2/tree"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	"os/exec"
 )
 
 func init() {
@@ -59,21 +58,25 @@ Cobra init must be run inside of a go module (please run "go mod init <MODNAME>"
 			projectGenerator, err := project.NewProjectGenerator(afs, newProject)
 			cobra.CheckErr(err)
 
-			cobra.CheckErr(projectGenerator.PrepareModels())
 			cobra.CheckErr(projectGenerator.CreateProject())
 
-			cobra.CheckErr(project.GoGet("github.com/spf13/cobra"))
-			cobra.CheckErr(project.GoGet("github.com/google/uuid"))
-			cobra.CheckErr(project.GoGet("github.com/inovacc/logger"))
-			cobra.CheckErr(project.GoGet("github.com/spf13/afero"))
-			cobra.CheckErr(project.GoGet("github.com/spf13/viper"))
-			cobra.CheckErr(project.GoGet("gopkg.in/yaml.v3"))
-			cobra.CheckErr(project.GoGet("go.uber.org/automaxprocs"))
+			commands := []string{
+				"gopkg.in/yaml.v3",
+				"github.com/spf13/afero",
+				"github.com/spf13/cobra",
+				"github.com/spf13/viper",
+				"github.com/google/uuid",
+				"github.com/inovacc/logger",
+				"go.uber.org/automaxprocs",
+			}
 
-			exeCmd := exec.Command("go", "mod", "tidy")
-			exeCmd.Stdout = nil
-			exeCmd.Stderr = nil
-			cobra.CheckErr(exeCmd.Run())
+			for _, command := range commands {
+				_, err = project.GoCommand(command)
+				cobra.CheckErr(err)
+			}
+
+			_, err = project.GoCommand("mod", "tidy", "-v")
+			cobra.CheckErr(err)
 
 			cmd.Printf("Your Cobra application is ready at\n%s\n", projectGenerator.GetProjectPath())
 

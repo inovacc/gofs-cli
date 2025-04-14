@@ -42,10 +42,6 @@ func TestGenerateRoot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := generator.PrepareModels(); err != nil {
-		t.Fatalf("Error creating project: %v", err)
-	}
-
 	if err := generator.CreateProject(); err != nil {
 		t.Fatalf("Error creating project: %v", err)
 	}

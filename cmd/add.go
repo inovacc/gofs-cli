@@ -16,7 +16,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/inovacc/cobra-cli/internal/project"
+	"github.com/inovacc/gofs-cli/internal/project"
 	"github.com/inovacc/utils/v2/tree"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"

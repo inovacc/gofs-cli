@@ -87,7 +87,7 @@ func parseModInfoV(afs afero.Fs) (*Mod, *CurDir, error) {
 	//	}
 	//
 	//	if _, err := os.Stat("go.mod"); err != nil {
-	//		if _, err := goCommand("mod", "init", path.Base(wd)); err != nil {
+	//		if _, err := GoCommand("mod", "init", path.Base(wd)); err != nil {
 	//			return nil, nil, fmt.Errorf("cannot run [go mod init %s], %v", path.Base(wd), err)
 	//		}
 	//	}
@@ -100,20 +100,20 @@ func parseModInfoV(afs afero.Fs) (*Mod, *CurDir, error) {
 }
 
 func GoGet(mod string) error {
-	_, err := goCommand("go", "get", mod)
+	_, err := GoCommand("go", "get", mod)
 	return err
 }
 
 func modInfoJSON(v any, args ...string) error {
 	cmdArgs := append([]string{"list", "-json"}, args...)
-	out, err := goCommand(cmdArgs...)
+	out, err := GoCommand(cmdArgs...)
 	if err != nil {
 		return err
 	}
 	return json.Unmarshal(out, v)
 }
 
-func goCommand(cmdArgs ...string) ([]byte, error) {
+func GoCommand(cmdArgs ...string) ([]byte, error) {
 	log.Println("Running command: go", cmdArgs)
 	return exec.Command("go", cmdArgs...).Output()
 }

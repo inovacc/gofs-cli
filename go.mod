@@ -1,4 +1,4 @@
-module github.com/inovacc/cobra-cli
+module github.com/inovacc/gofs-cli
 
 go 1.24
 

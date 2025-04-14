@@ -67,7 +67,7 @@ func parseModInfo(wd string) (*Mod, *CurDir) {
 
 	if mod.Path == "command-line-arguments" {
 		if _, err := os.Stat("go.mod"); err != nil {
-			_, err := goCommand("mod", "init", path.Base(wd))
+			_, err := GoCommand("mod", "init", path.Base(wd))
 			cobra.CheckErr(err)
 		}
 	}
@@ -123,7 +123,7 @@ func (g *Generator) CmdName() string {
 	return g.project.CmdName
 }
 
-func (g *Generator) PrepareModels() error {
+func (g *Generator) prepareModels() error {
 	if err := g.getFileContentLicense(); err != nil {
 		return err
 	}
@@ -169,6 +169,10 @@ func (g *Generator) PrepareModels() error {
 
 // CreateProject sets up the Project structure and files.
 func (g *Generator) CreateProject() error {
+	if err := g.prepareModels(); err != nil {
+		return err
+	}
+
 	if g.project.Legal == nil {
 		return errors.New("no legal project")
 	}
