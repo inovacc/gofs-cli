@@ -170,7 +170,7 @@ func parseModInfo(afs afero.Fs, wd string) (*Mod, *CurDir) {
 			file, err := afs.Create("go.mod")
 			cobra.CheckErr(err)
 
-			_, err = file.WriteString(fmt.Sprintf("module %s\n\ngo %v", filepath.Base(wd), mod.GoVersion))
+			_, err = fmt.Fprintf(file, "module %s\n\ngo %v", filepath.Base(wd), mod.GoVersion)
 			cobra.CheckErr(err)
 
 			cobra.CheckErr(modInfoJSON(&mod, "-m"))
