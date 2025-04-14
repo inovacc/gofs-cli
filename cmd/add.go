@@ -16,7 +16,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/inovacc/cobra-cli/internal/project"
+	"github.com/inovacc/gofs-cli/internal/project"
 	"github.com/inovacc/utils/v2/tree"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -60,7 +60,7 @@ Example: cobra-cli add server -> resulting in a new cmd/server.go`,
 			}
 
 			afs := afero.NewOsFs()
-			newProject := project.NewProject(args)
+			newProject := project.NewProject(afs, args)
 
 			projectGenerator, err := project.NewProjectGenerator(afs, newProject)
 			cobra.CheckErr(err)

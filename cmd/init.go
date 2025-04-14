@@ -15,15 +15,14 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/inovacc/cobra-cli/internal/project"
+	"github.com/inovacc/gofs-cli/internal/project"
 	"github.com/inovacc/utils/v2/tree"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
-	"os/exec"
 )
 
 func init() {
-	initCmd.SetOut(new(bytes.Buffer))
+	//initCmd.SetOut(new(bytes.Buffer))
 	initCmd.SetErr(new(bytes.Buffer))
 }
 
@@ -54,30 +53,33 @@ Cobra init must be run inside of a go module (please run "go mod init <MODNAME>"
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			afs := afero.NewOsFs()
-			newProject := project.NewProject(args)
+			newProject := project.NewProject(afs, args)
 
 			projectGenerator, err := project.NewProjectGenerator(afs, newProject)
 			cobra.CheckErr(err)
 
-			cobra.CheckErr(projectGenerator.PrepareModels())
+			cmd.Printf("Creating project structure\n")
 			cobra.CheckErr(projectGenerator.CreateProject())
 
-			cobra.CheckErr(project.GoGet("github.com/spf13/cobra"))
-			cobra.CheckErr(project.GoGet("github.com/google/uuid"))
-			cobra.CheckErr(project.GoGet("github.com/inovacc/logger"))
-			cobra.CheckErr(project.GoGet("github.com/spf13/afero"))
-			cobra.CheckErr(project.GoGet("github.com/spf13/viper"))
-			cobra.CheckErr(project.GoGet("gopkg.in/yaml.v3"))
-			cobra.CheckErr(project.GoGet("go.uber.org/automaxprocs"))
+			commands := []string{
+				"gopkg.in/yaml.v3",
+				"github.com/spf13/afero",
+				"github.com/spf13/cobra",
+				"github.com/spf13/viper",
+				"github.com/google/uuid",
+				"github.com/inovacc/logger",
+				"github.com/inovacc/utils/v2/uid",
+				"go.uber.org/automaxprocs",
+			}
 
-			exeCmd := exec.Command("go", "mod", "tidy")
-			exeCmd.Stdout = nil
-			exeCmd.Stderr = nil
-			cobra.CheckErr(exeCmd.Run())
+			cmd.Printf("Installing dependences\n")
+			for _, command := range commands {
+				cobra.CheckErr(project.GoGet(cmd.Context(), command))
+			}
 
-			cmd.Printf("Your Cobra application is ready at\n%s\n", projectGenerator.GetProjectPath())
+			cmd.Printf("Your application is ready at:\n\n%s\n", projectGenerator.GetProjectPath())
 
-			newTree := tree.NewTree(afs, projectGenerator.GetProjectPath())
+			newTree := tree.NewTree(afs, projectGenerator.GetProjectPath(), ".git")
 
 			cobra.CheckErr(newTree.MakeTree())
 

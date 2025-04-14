@@ -14,7 +14,7 @@
 package main
 
 import (
-	"github.com/inovacc/cobra-cli/cmd"
+	"github.com/inovacc/gofs-cli/cmd"
 	_ "go.uber.org/automaxprocs/maxprocs"
 )
 
